@@ -5,7 +5,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -21,10 +20,12 @@ public class Tournament {
 
     private String name;
 
-    @ManyToMany(cascade={CascadeType.MERGE })
-    @JoinTable(
-            name = "tournament_player",
-            joinColumns = @JoinColumn(name = "tournament_id"),
-            inverseJoinColumns = @JoinColumn(name = "player_id"))
-    private Set<Player> players;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "tournament_id")
+    private List<LeagueStanding> standings;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "tournament_id")
+    private List<PlayMatch> matches;
+    private String type;
 }

@@ -1,9 +1,9 @@
 package com.example.elopoc.service;
 
-import com.example.elopoc.domain.Player;
 import com.example.elopoc.mappers.PlayerMapper;
 import com.example.elopoc.model.PlayMatchDto;
 import com.example.elopoc.model.PlayerDto;
+import com.example.elopoc.model.TournamentDto;
 import com.example.elopoc.repository.PlayerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,8 +52,19 @@ public class PlayerServiceImpl implements PlayerService {
         return playMatchDto;
     }
 
+    private PlayMatchDto resetMatchScore(PlayMatchDto playMatchDto) {
+        playMatchDto.setScore1(-1);
+        playMatchDto.setScore2(-1);
+        return playMatchDto;
+    }
+
     public List<PlayMatchDto> generateMatchScore(List<PlayMatchDto> playMatchDtoList) {
         return playMatchDtoList.stream().map(this::generateMatchScore).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayMatchDto> resetMatchScore(TournamentDto tournament) {
+        return tournament.getMatches().stream().map(this::resetMatchScore).collect(Collectors.toList());
     }
 
     @Override

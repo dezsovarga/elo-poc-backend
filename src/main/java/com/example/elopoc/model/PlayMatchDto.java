@@ -9,8 +9,11 @@ import lombok.*;
 @Builder
 public class PlayMatchDto {
 
+    private Long id;
     private PlayerDto player1;
     private PlayerDto player2;
     private int score1;
     private int score2;
+    private int roundNumber;
+
 }

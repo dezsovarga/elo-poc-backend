@@ -1,19 +1,17 @@
 package com.example.elopoc.model;
 
 import lombok.*;
-import java.util.List;
+
+import java.util.Set;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TournamentDto {
+public class CreateTournamentDto {
 
-    private Long id;
     private String name;
-    private List<LeagueStandingDto> standings;
+    private Set<PlayerDto> players;
     private String type;
-    private List<PlayMatchDto> matches;
-
 }

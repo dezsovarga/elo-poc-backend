@@ -3,7 +3,6 @@ package com.example.elopoc.domain;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -14,12 +13,10 @@ import java.util.Set;
 public class Player {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
     private String name;
     private int elo;
 
-    @ManyToMany(mappedBy = "players")
-    private Set<Tournament> tournaments;
 }
