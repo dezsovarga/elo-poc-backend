@@ -44,8 +44,8 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     private PlayMatchDto generateMatchScore(PlayMatchDto playMatchDto) {
-        int score1 = score(playMatchDto.getPlayer1(), playMatchDto.getPlayer2(), 15);
-        int score2 = score(playMatchDto.getPlayer2(), playMatchDto.getPlayer1(), 15);
+        int score1 = score(playMatchDto.getPlayer1(), playMatchDto.getPlayer2(), 600);
+        int score2 = score(playMatchDto.getPlayer2(), playMatchDto.getPlayer1(), 600);
 
         playMatchDto.setScore1(score1);
         playMatchDto.setScore2(score2);
@@ -64,7 +64,8 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public List<PlayMatchDto> resetMatchScore(TournamentDto tournament) {
-        return tournament.getMatches().stream().map(this::resetMatchScore).collect(Collectors.toList());
+        //TODO: refactor for all groups
+        return tournament.getGroups().get(0).getMatches().stream().map(this::resetMatchScore).collect(Collectors.toList());
     }
 
     @Override
@@ -122,7 +123,7 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     private boolean scoreAttempt(PlayerDto playerToScore, PlayerDto playerToDefend) {
-        int upperBound = Math.max(playerToScore.getElo(), playerToDefend.getElo()) * 110/100;
+        int upperBound = Math.max(playerToScore.getElo(), playerToDefend.getElo()) * 130/100;
         boolean toScore = this.scoreAttempt(playerToScore, upperBound);
         boolean toDefend = this.scoreAttempt(playerToDefend, upperBound);
 
@@ -130,12 +131,21 @@ public class PlayerServiceImpl implements PlayerService {
     }
 
     private int score(PlayerDto playerToScore, PlayerDto playerToDefend, int iteration) {
+        boolean badLuckFactor = new Random().nextInt(20) < 3;
+        boolean luckFactor = !badLuckFactor && new Random().nextInt(10) < 3;
+        int adjustment = badLuckFactor ? -1 : luckFactor ? 1 : 0;
+
+        boolean roundUp = new Random().nextInt(10) < 3;
         int score=0;
-        for (int i=0; i<10; i++) {
+        for (int i=0; i<iteration; i++) {
             if (scoreAttempt(playerToScore, playerToDefend)) {
                 score++;
             }
         }
-        return score;
+        score = roundUp ? (int) Math.ceil(score/100.0) : Math.round(score/100);
+        if (score == 0 && adjustment == -1 ) {
+            adjustment = 0;
+        }
+        return  score + adjustment;
     }
 }

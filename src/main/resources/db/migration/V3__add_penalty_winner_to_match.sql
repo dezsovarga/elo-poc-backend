@@ -1,0 +1,1 @@
+alter table play_match add penalty_winner_id bigint null;

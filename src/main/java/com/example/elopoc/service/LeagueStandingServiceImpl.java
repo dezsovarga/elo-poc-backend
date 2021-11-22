@@ -31,7 +31,7 @@ public class LeagueStandingServiceImpl implements LeagueStandingService {
     @Override
     public LeagueStanding initiateLeagueStanding(PlayerDto playerdto) {
         Optional<Player> player = playerRepository.findById(playerdto.getId());
-        LeagueStanding leagueStanding = LeagueStanding.builder().build();
+        LeagueStanding leagueStanding;
         if (player.isPresent()) {
             leagueStanding = LeagueStanding.builder()
                     .player(player.get())
@@ -80,34 +80,24 @@ public class LeagueStandingServiceImpl implements LeagueStandingService {
 
         //retur
         Collections.reverse(players);
-        scheduleMatches(players, matchList, bergerTableSchedule, players.size());
+        this.scheduleMatches(players, matchList, bergerTableSchedule, players.size());
         matchList.stream().forEach(playMatchRepository::save);
+
+        Collections.reverse(players);
         return matchList;
     }
 
-    @Override
-    public PlayMatch updateMatchScore(PlayMatchDto matchDto) {
-        Optional<PlayMatch> matchOptional = playMatchRepository.findById(matchDto.getId());
-        if (matchOptional.isPresent()) {
-            PlayMatch match = matchOptional.get();
-            match.setScore1(matchDto.getScore1());
-            match.setScore2(matchDto.getScore2());
-            playMatchRepository.save(match);
-            return match;
-        } else {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Match with id " + matchDto.getId() + " not found");
-        }
-    }
+
 
     @Override
-    public List<LeagueStanding> generateStandings(long tournamentId) {
+    public List<LeagueStanding> updateStandings(long tournamentId) {
         Optional<Tournament> tournamentOptional = tournamentRepository.findById(tournamentId);
         if (tournamentOptional.isPresent()) {
             Tournament tournament = tournamentOptional.get();
+            //TODO: fix for all groups
             this.clearStandings(tournament);
-            tournament.getMatches().stream().forEach(m -> this.updateStandingsForMatch(tournament, m));
-            return tournament.getStandings();
+            tournament.getGroups().get(0).getMatches().stream().forEach(m -> this.updateStandingsForMatch(tournament, m));
+            return tournament.getGroups().get(0).getStandings();
         } else {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Tournament with id " + tournamentId + " not found");
@@ -115,7 +105,8 @@ public class LeagueStandingServiceImpl implements LeagueStandingService {
     }
 
     private void clearStandings(Tournament tournament) {
-        tournament.getStandings().stream().forEach(s -> {
+        //TODO: fix for all groups
+        tournament.getGroups().get(0).getStandings().stream().forEach(s -> {
             s.setPlayedGames(0);
             s.setWins(0);
             s.setDraws(0);
@@ -128,9 +119,10 @@ public class LeagueStandingServiceImpl implements LeagueStandingService {
 
     private void updateStandingsForMatch(Tournament tournament, PlayMatch match) {
         if (match.getScore1() > -1 && match.getScore2() > -1) {
-            LeagueStanding standing1 = tournament.getStandings()
+            //TODO: fix for all groups
+            LeagueStanding standing1 = tournament.getGroups().get(0).getStandings()
                     .stream().filter(s -> s.getPlayer().getId() == match.getPlayer1().getId()).findFirst().get();
-            LeagueStanding standing2 = tournament.getStandings()
+            LeagueStanding standing2 = tournament.getGroups().get(0).getStandings()
                     .stream().filter(s -> s.getPlayer().getId() == match.getPlayer2().getId()).findFirst().get();
             if (match.getScore1() > match.getScore2()) {
                 this.updateStandingByFirstWin(standing1, standing2, match);

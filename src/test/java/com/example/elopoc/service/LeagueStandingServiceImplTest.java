@@ -58,9 +58,9 @@ class LeagueStandingServiceImplTest {
         assertTrue(matches.get(0).getRoundNumber() == 1);
 
 
-        assertTrue(matches.get(matches.size()-1).getPlayer1().getName().equals(players.get(4).getName()));
-        assertTrue(matches.get(matches.size()-1).getPlayer2().getName().equals(players.get(0).getName()));
-        assertTrue(matches.get(matches.size()-1).getRoundNumber() == 5);
+        assertTrue(matches.get(matches.size()-1).getPlayer1().getName().equals(players.get(1).getName()));
+        assertTrue(matches.get(matches.size()-1).getPlayer2().getName().equals(players.get(5).getName()));
+        assertTrue(matches.get(matches.size()-1).getRoundNumber() == 10);
 
 
     }

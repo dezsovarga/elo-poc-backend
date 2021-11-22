@@ -58,7 +58,6 @@ insert into player (  elo, name) values( 1434, "Egypt");
 insert into player (  elo, name) values( 1411, "Ghana");
 insert into player (  elo, name) values( 1404, "Cameroon");
 
-
 insert into player (  elo, name) values( 1520, "Japan");
 insert into player (  elo, name) values( 1493, "Australia");
 insert into player (  elo, name) values( 1479, "Korea Republic");
@@ -66,21 +65,6 @@ insert into player (  elo, name) values( 1445, "Qatar");
 insert into player (  elo, name) values( 1406, "Saudi Arabia");
 insert into player (  elo, name) values( 1538, "Iran");
 insert into player (  elo, name) values( 1334, "China");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

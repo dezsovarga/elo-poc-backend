@@ -120,6 +120,19 @@
 				</execution>
 			</executions>
 		</plugin>
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>8.0.0</version>
+				<configuration>
+					<user>elo_manager</user>
+					<password>password</password>
+					<schemas>
+						<schema>elopoc</schema>
+					</schemas>
+
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

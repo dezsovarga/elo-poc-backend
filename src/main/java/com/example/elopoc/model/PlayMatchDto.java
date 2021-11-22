@@ -15,5 +15,5 @@ public class PlayMatchDto {
     private int score1;
     private int score2;
     private int roundNumber;
-
+    private PlayerDto penaltyWinner;
 }

@@ -8,12 +8,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TournamentDto {
+public class LeagueGroupDto {
 
     private Long id;
-    private String name;
-    private List<LeagueGroupDto> groups;
-    private String type;
-    private KnockoutStageDto knockoutStage;
+    private List<LeagueStandingDto> standings;
+    private List<PlayMatchDto> matches;
+//    private TournamentDto tournament;
 
 }

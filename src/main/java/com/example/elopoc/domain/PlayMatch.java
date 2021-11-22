@@ -26,4 +26,7 @@ public class PlayMatch {
     private int score2 = -1;
 
     private int roundNumber;
+
+    @OneToOne
+    private Player penaltyWinner;
 }

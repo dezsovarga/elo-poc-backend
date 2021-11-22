@@ -1,6 +1,5 @@
 package com.example.elopoc.domain;
 
-
 import lombok.*;
 
 import javax.persistence.*;
@@ -12,19 +11,19 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
-public class Tournament {
+public class KnockoutStage {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "tournament_id")
-    private List<LeagueGroup> groups;
+    @JoinColumn(name = "knockoutStage_id")
+    private List<PlayMatch> matches;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private KnockoutStage knockoutStage;
-    private String type;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tournament_id")
+    private Tournament tournament;
+
+
 }
