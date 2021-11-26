@@ -54,6 +54,7 @@ public class TournamentController {
     @PostMapping(produces = { "application/json" }, path = "tournament/{tournamentId}/reset")
     public TournamentDto resetTournament(@PathVariable long tournamentId) {
 
-        return playMatchService.resetTournament(tournamentId);
+        playMatchService.resetTournament(tournamentId);
+        return tournamentService.getTournamentById(tournamentId);
     }
 }

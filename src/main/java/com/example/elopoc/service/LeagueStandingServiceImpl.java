@@ -1,15 +1,12 @@
 package com.example.elopoc.service;
 
-import com.example.elopoc.domain.LeagueStanding;
-import com.example.elopoc.domain.PlayMatch;
-import com.example.elopoc.domain.Player;
-import com.example.elopoc.domain.Tournament;
-import com.example.elopoc.model.PlayMatchDto;
+import com.example.elopoc.domain.*;
 import com.example.elopoc.model.PlayerDto;
 import com.example.elopoc.repository.LeagueStandingRepository;
 import com.example.elopoc.repository.PlayMatchRepository;
 import com.example.elopoc.repository.PlayerRepository;
 import com.example.elopoc.repository.TournamentRepository;
+import com.sun.istack.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -87,42 +84,34 @@ public class LeagueStandingServiceImpl implements LeagueStandingService {
         return matchList;
     }
 
-
-
     @Override
-    public List<LeagueStanding> updateStandings(long tournamentId) {
-        Optional<Tournament> tournamentOptional = tournamentRepository.findById(tournamentId);
-        if (tournamentOptional.isPresent()) {
-            Tournament tournament = tournamentOptional.get();
-            //TODO: fix for all groups
-            this.clearStandings(tournament);
-            tournament.getGroups().get(0).getMatches().stream().forEach(m -> this.updateStandingsForMatch(tournament, m));
-            return tournament.getGroups().get(0).getStandings();
-        } else {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Tournament with id " + tournamentId + " not found");
-        }
+    public void updateStandings(Tournament tournament) {
+         this.clearStandings(tournament);
+         tournament.getGroups().stream().forEach(group ->
+            group.getMatches().stream().forEach(m -> this.updateStandingsForMatch(group, m))
+         );
     }
 
     private void clearStandings(Tournament tournament) {
-        //TODO: fix for all groups
-        tournament.getGroups().get(0).getStandings().stream().forEach(s -> {
-            s.setPlayedGames(0);
-            s.setWins(0);
-            s.setDraws(0);
-            s.setLosses(0);
-            s.setGoalsFor(0);
-            s.setGoalsAgainst(0);
-            s.setPoints(0);
-        });
+        tournament.getGroups().stream().forEach(group ->
+            group.getStandings().stream().forEach(s -> {
+                s.setPlayedGames(0);
+                s.setWins(0);
+                s.setDraws(0);
+                s.setLosses(0);
+                s.setGoalsFor(0);
+                s.setGoalsAgainst(0);
+                s.setPoints(0);
+            })
+        );
+        tournamentRepository.save(tournament);
     }
 
-    private void updateStandingsForMatch(Tournament tournament, PlayMatch match) {
+    private void updateStandingsForMatch(LeagueGroup group, @NotNull PlayMatch match) {
         if (match.getScore1() > -1 && match.getScore2() > -1) {
-            //TODO: fix for all groups
-            LeagueStanding standing1 = tournament.getGroups().get(0).getStandings()
+            LeagueStanding standing1 = group.getStandings()
                     .stream().filter(s -> s.getPlayer().getId() == match.getPlayer1().getId()).findFirst().get();
-            LeagueStanding standing2 = tournament.getGroups().get(0).getStandings()
+            LeagueStanding standing2 = group.getStandings()
                     .stream().filter(s -> s.getPlayer().getId() == match.getPlayer2().getId()).findFirst().get();
             if (match.getScore1() > match.getScore2()) {
                 this.updateStandingByFirstWin(standing1, standing2, match);
@@ -139,7 +128,7 @@ public class LeagueStandingServiceImpl implements LeagueStandingService {
     }
 
     private void updateStandingByFirstWin(LeagueStanding standing1, LeagueStanding standing2, PlayMatch match) {
-          standing1.setWins(standing1.getWins() + 1);
+        standing1.setWins(standing1.getWins() + 1);
         standing1.setPoints(standing1.getPoints() + 3);
         standing1.setPlayedGames(standing1.getPlayedGames() + 1);
         standing1.setGoalsFor(standing1.getGoalsFor() + match.getScore1());

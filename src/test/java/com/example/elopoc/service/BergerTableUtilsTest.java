@@ -30,6 +30,5 @@ class BergerTableUtilsTest {
         List<Integer> expectedElements = Arrays.asList(1, 6, 2, 5, 3, 4, 6, 4, 5, 3, 1, 2);
         assertTrue(firstPart.containsAll(expectedElements));
         assertTrue(expectedElements.containsAll(firstPart));
-
     }
 }

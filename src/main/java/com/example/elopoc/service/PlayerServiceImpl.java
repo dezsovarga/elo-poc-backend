@@ -64,8 +64,13 @@ public class PlayerServiceImpl implements PlayerService {
 
     @Override
     public List<PlayMatchDto> resetMatchScore(TournamentDto tournament) {
-        //TODO: refactor for all groups
-        return tournament.getGroups().get(0).getMatches().stream().map(this::resetMatchScore).collect(Collectors.toList());
+        List<PlayMatchDto> resetMatchList = new ArrayList<>();
+        tournament.getGroups().stream().forEach(
+                group -> resetMatchList.addAll(
+                        group.getMatches().stream().map(this::resetMatchScore).collect(Collectors.toList())
+                )
+        );
+        return resetMatchList;
     }
 
     @Override

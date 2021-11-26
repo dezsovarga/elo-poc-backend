@@ -1,17 +1,10 @@
 package com.example.elopoc.service;
 
-import com.example.elopoc.domain.PlayMatch;
-import com.example.elopoc.domain.Player;
-import com.example.elopoc.mappers.PlayerMapperImpl;
-import com.example.elopoc.model.PlayMatchDto;
 import com.example.elopoc.model.PlayerDto;
 import com.example.elopoc.repository.PlayerRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -33,8 +26,8 @@ class PlayerServiceImplTest {
 
         playerService.play(player1, player2);
 
-        assertTrue(player1.getElo() == 1515);
-        assertTrue(player2.getElo() == 1485);
+        assertTrue(player1.getElo() == 1515 || player1.getElo() == 1485);
+        assertTrue(player2.getElo() == 1485 || player2.getElo() == 1515);
 
     }
 

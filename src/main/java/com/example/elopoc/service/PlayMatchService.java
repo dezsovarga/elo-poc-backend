@@ -17,5 +17,5 @@ public interface PlayMatchService {
 
     List<PlayMatch> saveMatchScores(long tournamentId, List<PlayMatchDto> matchDtoList);
 
-    TournamentDto resetTournament(long tournamentId);
+    void resetTournament(long tournamentId);
 }

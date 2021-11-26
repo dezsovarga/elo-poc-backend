@@ -8,6 +8,7 @@ import com.example.elopoc.mappers.TournamentMapper;
 import com.example.elopoc.model.PlayMatchDto;
 import com.example.elopoc.model.TournamentDto;
 import com.example.elopoc.model.TournamentTypeEnum;
+import com.example.elopoc.repository.KnockoutStageRepository;
 import com.example.elopoc.repository.PlayMatchRepository;
 import com.example.elopoc.repository.TournamentRepository;
 import lombok.RequiredArgsConstructor;
@@ -74,31 +75,52 @@ public class PlayMatchServiceImpl implements PlayMatchService {
             Tournament tournament = tournamentOptional.get();
             if (tournament.getType().equals(TournamentTypeEnum.LEAGUE.value)) {
                 playMatchList = matchResults.stream().map(this::saveMatchScore).collect(Collectors.toList());
-                leagueStandingService.updateStandings(tournamentId);
-            } else
-                if (tournament.getType().equals(TournamentTypeEnum.KNOCK_OUT.value)) {
+                leagueStandingService.updateStandings(tournament);
+            }
+            if (tournament.getType().equals(TournamentTypeEnum.KNOCK_OUT.value)) {
+                playMatchList = this.saveKnockoutMatches(matchResults);
+                this.generateNextKnockOutRound(tournament, playMatchList);
+            }
+            if (tournament.getType().equals(TournamentTypeEnum.LEAGUE_AND_KNOCK_OUT.value)) {
+                if (!tournamentService.isGroupStageComplete(tournament)) {
+                    playMatchList = matchResults.stream().map(this::saveMatchScore).collect(Collectors.toList());
+                    leagueStandingService.updateStandings(tournament);
+                    if (tournamentService.isGroupStageComplete(tournament)) {
+                        tournamentService.addKnockOutStageIfMissing(tournament);
+                    }
+                } else {
                     playMatchList = this.saveKnockoutMatches(matchResults);
                     this.generateNextKnockOutRound(tournament, playMatchList);
                 }
+            }
         }
         return playMatchList;
     }
 
     @Override
-    public TournamentDto resetTournament(long tournamentId) {
-        TournamentDto tournamentDto = tournamentService.getTournamentById(tournamentId);
+    public void resetTournament(long tournamentId) {
 
-        if (tournamentDto.getType().equals(TournamentTypeEnum.LEAGUE.value)) {
-            List<PlayMatchDto> matchResults = playerService.resetMatchScore(tournamentDto);
-            matchResults.stream().map(this::saveMatchScore).collect(Collectors.toList());
-            leagueStandingService.updateStandings(tournamentId);
-        } else
-        if (tournamentDto.getType().equals(TournamentTypeEnum.KNOCK_OUT.value)) {
-            Tournament tournament = tournamentMapper.dtoToTournament(tournamentDto);
-            this.resetKnockOutTournament(tournament);
+        Optional<Tournament> tournamentOptional = tournamentRepository.findById(tournamentId);
+        if (tournamentOptional.isPresent()) {
+            Tournament tournament = tournamentOptional.get();
+            TournamentDto tournamentDto = tournamentMapper.tournamentToDto(tournament);
+
+            if (tournament.getType().equals(TournamentTypeEnum.LEAGUE.value)) {
+                List<PlayMatchDto> matchResults = playerService.resetMatchScore(tournamentDto);
+                matchResults.stream().map(this::saveMatchScore).collect(Collectors.toList());
+                leagueStandingService.updateStandings(tournament);
+            }
+            if (tournament.getType().equals(TournamentTypeEnum.KNOCK_OUT.value)) {
+                this.resetKnockOutTournament(tournament);
+            }
+            if (tournament.getType().equals(TournamentTypeEnum.LEAGUE_AND_KNOCK_OUT.value)) {
+                List<PlayMatchDto> matchResults = playerService.resetMatchScore(tournamentDto);
+                matchResults.stream().map(this::saveMatchScore).collect(Collectors.toList());
+                leagueStandingService.updateStandings(tournament);
+                tournament.getKnockoutStage().getMatches().clear();
+                tournamentRepository.save(tournament);
+            }
         }
-
-        return tournamentService.getTournamentById(tournamentId);
     }
 
     private void resetKnockOutTournament(Tournament tournament) {
