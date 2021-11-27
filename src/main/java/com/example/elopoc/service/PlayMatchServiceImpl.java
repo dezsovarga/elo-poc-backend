@@ -1,13 +1,9 @@
 package com.example.elopoc.service;
 
-import com.example.elopoc.domain.PlayMatch;
-import com.example.elopoc.domain.Player;
-import com.example.elopoc.domain.Tournament;
+import com.example.elopoc.domain.*;
 import com.example.elopoc.mappers.PlayerMapper;
 import com.example.elopoc.mappers.TournamentMapper;
-import com.example.elopoc.model.PlayMatchDto;
-import com.example.elopoc.model.TournamentDto;
-import com.example.elopoc.model.TournamentTypeEnum;
+import com.example.elopoc.model.*;
 import com.example.elopoc.repository.KnockoutStageRepository;
 import com.example.elopoc.repository.PlayMatchRepository;
 import com.example.elopoc.repository.TournamentRepository;
@@ -118,9 +114,20 @@ public class PlayMatchServiceImpl implements PlayMatchService {
                 matchResults.stream().map(this::saveMatchScore).collect(Collectors.toList());
                 leagueStandingService.updateStandings(tournament);
                 tournament.getKnockoutStage().getMatches().clear();
+                List<LeagueGroup> newLeagueGroups = this.resetLeagueGroupsRandomly(tournament);
+                tournamentService.removeAllGroupsOfTournament(tournament);
+                tournament.setGroups(newLeagueGroups);
                 tournamentRepository.save(tournament);
             }
         }
+    }
+
+    private List<LeagueGroup> resetLeagueGroupsRandomly(Tournament tournament) {
+        List<PlayerDto> playerDtoList = new ArrayList<>();
+        TournamentDto tournamentDto = tournamentMapper.tournamentToDto(tournament);
+        tournamentDto.getGroups().stream().forEach(group ->
+                group.getStandings().forEach(standing -> playerDtoList.add(standing.getPlayer())));
+        return tournamentService.createAllLeagueGroupsFromPlayers(new HashSet<>(playerDtoList));
     }
 
     private void resetKnockOutTournament(Tournament tournament) {

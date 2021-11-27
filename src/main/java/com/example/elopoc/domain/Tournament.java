@@ -20,7 +20,7 @@ public class Tournament {
 
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "tournament_id")
     private List<LeagueGroup> groups;
 

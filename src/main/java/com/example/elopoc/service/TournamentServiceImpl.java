@@ -5,8 +5,7 @@ import com.example.elopoc.domain.*;
 import com.example.elopoc.mappers.PlayerMapper;
 import com.example.elopoc.mappers.TournamentMapper;
 import com.example.elopoc.model.*;
-import com.example.elopoc.repository.KnockoutStageRepository;
-import com.example.elopoc.repository.TournamentRepository;
+import com.example.elopoc.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,22 +24,49 @@ public class TournamentServiceImpl implements TournamentService {
     private final LeagueStandingService leagueStandingService;
     private final PlayerMapper playerMapper;
     private final KnockoutStageRepository knockoutStageRepository;
+    private final LeagueStandingRepository leagueStandingRepository;
+    private final PlayMatchRepository playMatchRepository;
+    private final LeagueGroupRepository leagueGroupRepository;
+
 
     @Override
     public List<TournamentDto> listTournaments() {
         return tournamentRepository.findAll().stream().map(tournamentMapper::tournamentToDto).collect(Collectors.toList());
     }
 
-    private List<LeagueGroup> createAllLeagueGroupsFromPlayers(Set<PlayerDto> playersDto) {
+    public List<LeagueGroup> createAllLeagueGroupsFromPlayers(Set<PlayerDto> playersDto) {
+        List<LeagueGroup> leagueGroupList = new ArrayList<>();
         final AtomicInteger counter = new AtomicInteger();
-        int chunkSize = 4;
-
-        final Collection<List<PlayerDto>> subSets = playersDto.stream()
+        int chunkSize = playersDto.size() / 4;
+        List<PlayerDto> playerDtoList = playersDto.stream().collect(Collectors.toList());
+        playerDtoList.sort(Comparator.comparingInt(PlayerDto::getElo));
+        Collection<List<PlayerDto>> pots = playerDtoList.stream()
                 .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / chunkSize))
                 .values();
+        pots.stream().forEach(pot -> Collections.shuffle(pot));
 
-        return subSets.stream().map(group ->
-                this.createLeagueGroupFromPlayers(new HashSet<>(group))).collect(Collectors.toList());
+        List<PlayerDto> group = new ArrayList();
+        for (int i=0; i< chunkSize; i++) {
+            for (List<PlayerDto> pot: pots) {
+                group.add(pot.get(i));
+            }
+            leagueGroupList.add(this.createLeagueGroupFromPlayers(new HashSet<>(group)));
+            group.clear();
+        }
+        return leagueGroupList;
+    }
+
+    @Override
+    public void removeAllGroupsOfTournament(Tournament tournament) {
+        tournament.getGroups().forEach(group -> {
+                    group.getStandings().clear();
+                    group.getMatches().clear();
+                    group.setTournament(null);
+                    leagueGroupRepository.delete(group);
+
+        });
+        tournament.setGroups(null);
+        tournamentRepository.save(tournament);
     }
 
     private LeagueGroup createLeagueGroupFromPlayers(Set<PlayerDto> playersDto) {

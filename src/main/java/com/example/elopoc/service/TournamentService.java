@@ -1,13 +1,12 @@
 package com.example.elopoc.service;
 
-import com.example.elopoc.domain.KnockoutStage;
-import com.example.elopoc.domain.PlayMatch;
-import com.example.elopoc.domain.Player;
-import com.example.elopoc.domain.Tournament;
+import com.example.elopoc.domain.*;
 import com.example.elopoc.model.CreateTournamentDto;
+import com.example.elopoc.model.PlayerDto;
 import com.example.elopoc.model.TournamentDto;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TournamentService {
 
@@ -26,5 +25,10 @@ public interface TournamentService {
     KnockoutStage initiateKnockoutStage(Tournament tournament);
 
     void addKnockOutStageIfMissing(Tournament tournament);
+
+    List<LeagueGroup> createAllLeagueGroupsFromPlayers(Set<PlayerDto> playersDto);
+
+    void removeAllGroupsOfTournament(Tournament tournament);
+
 
 }

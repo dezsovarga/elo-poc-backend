@@ -76,8 +76,8 @@ public class LeagueStandingServiceImpl implements LeagueStandingService {
         this.scheduleMatches(players, matchList, bergerTableSchedule, 1);
 
         //retur
-        Collections.reverse(players);
-        this.scheduleMatches(players, matchList, bergerTableSchedule, players.size());
+//        Collections.reverse(players);
+//        this.scheduleMatches(players, matchList, bergerTableSchedule, players.size());
         matchList.stream().forEach(playMatchRepository::save);
 
         Collections.reverse(players);
